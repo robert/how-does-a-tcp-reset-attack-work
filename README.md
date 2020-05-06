@@ -1,6 +1,6 @@
 # How does a TCP Reset Attack work?
 
-The supporting code for my blog post "How does a TCP Reset Attack work?" See that post for much more detail.
+The supporting code for my blog post "[How does a TCP Reset Attack work?](https://robertheaton.com/2020/04/27/how-does-a-tcp-reset-attack-work/)"
 
 ## To run
 
