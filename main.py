@@ -1,13 +1,25 @@
 from scapy.all import *
+import ifaddr
 import threading
 import random
 
 DEFAULT_WINDOW_SIZE = 2052
 
+
+# In order for this attack to work on Linux, we must
+# use L3RawSocket, which under the hood sets up the socket
+# to use the PF_INET "domain". This is required because of the
+# way localhost works on Linux.
+#
+# See https://scapy.readthedocs.io/en/latest/troubleshooting.html#i-can-t-ping-127-0-0-1-scapy-does-not-work-with-127-0-0-1-or-on-the-loopback-interface for more details.
+conf.L3socket = L3RawSocket
+
 def log(msg, params={}):
     formatted_params = " ".join([f"{k}={v}" for k, v in params.items()])
     print(f"{msg} {formatted_params}")
 
+def is_adapter_localhost(adapter, localhost_ip):
+    return len([ip for ip in adapter.ips if ip.ip == localhost_ip]) > 0
 
 def is_packet_on_tcp_conn(server_ip, server_port, client_ip):
     def f(p):
@@ -105,8 +117,14 @@ def log_packet(p):
 
 
 if __name__ == "__main__":
-    iface = "lo0"
     localhost_ip = "127.0.0.1"
+    local_ifaces = [
+        adapter.name for adapter in ifaddr.get_adapters()
+        if is_adapter_localhost(adapter, localhost_ip)
+    ]
+
+    iface = local_ifaces[0]
+
     localhost_server_port = 8000
 
     log("Starting sniff...")
